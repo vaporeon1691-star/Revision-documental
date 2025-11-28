@@ -1,0 +1,44 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build EXE
+        run: |
+          pyinstaller app_gui.py `
+            --name "Generador_Protocolos" `
+            --windowed `
+            --onefile `
+            --add-data "generador.py;." `
+            --hidden-import=generador `
+            --hidden-import=docxtpl `
+            --hidden-import=jinja2 `
+            --hidden-import=jinja2.ext `
+            --hidden-import=openpyxl `
+            --collect-all jinja2 `
+            --collect-all docxtpl
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Generador_Protocolos
+          path: dist/Generador_Protocolos.exe
